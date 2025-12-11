@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cashback Categories</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --bg: #022a34;
+      --card: #064255;
+      --card-hover: #075268;
+      --selected: #08c46c;
+      --text-main: #eaf8ff;
+      --text-muted: #8aa5b2;
+      --accent: #10e07b;
+      --danger: #ff6b6b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #064255 0, #011820 60%);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .phone-shell {
+      width: 393px;
+      height: 852px;
+      max-height: 100vh;
+      background: #012029;
+      border-radius: 32px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+      padding: 24px 22px 22px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    .subtitle span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .categories {
+      margin-top: 24px;
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .category-card {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: background 0.18s ease, transform 0.08s ease,
+        box-shadow 0.18s ease;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+      touch-action: manipulation;
+    }
+
+    .category-card:hover {
+      background: var(--card-hover);
+    }
+
+    .category-card:active {
+      transform: scale(0.97) translateY(1px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    }
+
+    .category-main {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .category-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: rgba(1, 25, 32, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .category-label {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .check {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 2px solid rgba(173, 211, 204, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #00130d;
+      background: transparent;
+      transition: background 0.16s ease, border-color 0.16s ease,
+        transform 0.1s ease, color 0.16s ease;
+    }
+
+    .check span {
+      opacity: 0;
+      transform: scale(0.4);
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+
+    .category-card.selected {
+      background: var(--selected);
+    }
+
+    .category-card.selected .category-icon {
+      background: rgba(1, 25, 32, 0.15);
+    }
+
+    .category-card.selected .check {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #01231a;
+    }
+
+    .category-card.selected .check span {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .category-card.limit-reached:not(.selected) {
+      opacity: 0.45;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .category-card.limit-reached:not(.selected):hover {
+      background: var(--card);
+    }
+
+    .footer {
+      margin-top: 16px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .info-row strong {
+      color: var(--accent);
+    }
+
+    .info-row .error {
+      color: var(--danger);
+    }
+
+    .btn {
+      border: none;
+      padding: 16px 20px;
+      border-radius: 999px;
+      width: 100%;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.16s ease, transform 0.08s ease,
+        box-shadow 0.16s ease, opacity 0.12s ease;
+    }
+
+    #continue-btn {
+      background: #11d979;
+      color: #02231b;
+      box-shadow: 0 14px 32px rgba(7, 188, 103, 0.5);
+    }
+
+    #continue-btn:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 6px 20px rgba(7, 188, 103, 0.5);
+    }
+
+    #continue-btn:disabled {
+      background: #065c3b;
+      color: #4f7d6d;
+      box-shadow: none;
+      cursor: default;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 420px) {
+      .phone-shell {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-shell">
+    <header class="header">
+      <div class="title">Select Cashback<br>Categories</div>
+      <div class="subtitle">
+        Choose <span>3</span> out of 7 categories
+      </div>
+    </header>
+
+    <main class="categories" aria-label="Cashback categories">
+      <div class="category-card" data-name="Groceries">
+        <div class="category-main">
+          <div class="category-icon">🛒</div>
+          <div class="category-label">Groceries</div>
+        </div>
+        <div class="check" aria-hidden="true">
+          <span>✓</span>
+        </div>
+      </div>
+
+      <div class="category-card" data-name="Restaurants">
+        <div class="category-main">
+          <div class="category-icon">🍽️</div>
+          <div class="category-label">Restaurants</div>
+        </div>
+        <div class="check">
+          <span>✓</span>
+        </div>
+      </div>
+
+      <div class="category-card" data-name="Gas">
+        <div class="category-main">
+          <div class="category-icon">⛽</div>
+          <div class="category-label">Gas</div>
+        </div>
+        <div class="check">
+          <span>✓</span>
+        </div>
+      </div>
+
+      <div class="category-card" data-name="Travel">
+        <div class="category-main">
+          <div class="category-icon">✈️</div>
+          <div class="category-label">Travel</div>
+        </div>
+        <div class="check">
+          <span>✓</span>
+        </div>
+      </div>
+
+      <div class="category-card" data-name="Entertainment">
+        <div class="category-main">
+          <div class="category-icon">🎬</div>
+          <div class="category-label">Entertainment</div>
+        </div>
+        <div class="check">
+          <span>✓</span>
+        </div>
+      </div>
+
+      <div class="category-card" data-name="Clothing">
+        <div class="category-main">
+          <div class="category-icon">👕</div>
+          <div class="category-label">Clothing</div>
+        </div>
+        <div class="check">
+          <span>✓</span>
+        </div>
+      </div>
+
+      <div class="category-card" data-name="Online Shopping">
+        <div class="category-main">
+          <div class="category-icon">📦</div>
+          <div class="category-label">Online Shopping</div>
+        </div>
+        <div class="check">
+          <span>✓</span>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="info-row">
+        <div id="selection-counter">0 / 3 selected</div>
+        <div id="selection-hint">Tap to choose your top categories</div>
+      </div>
+      <button id="continue-btn" class="btn" disabled>
+        Continue
+      </button>
+    </footer>
+  </div>
+
+  <script>
+    const LIMIT = 3;
+
+    const cards = Array.from(document.querySelectorAll('.category-card'));
+    const counterEl = document.getElementById('selection-counter');
+    const hintEl = document.getElementById('selection-hint');
+    const continueBtn = document.getElementById('continue-btn');
+
+    function getSelectedCards() {
+      return cards.filter(card => card.classList.contains('selected'));
+    }
+
+    function updateUI() {
+      const selected = getSelectedCards().length;
+      counterEl.textContent = `${selected} / ${LIMIT} selected`;
+
+      const reachedLimit = selected >= LIMIT;
+
+      // Управляем состоянием кнопки
+      continueBtn.disabled = selected !== LIMIT;
+
+      // Подсказка
+      if (selected === 0) {
+        hintEl.textContent = 'Tap to choose your top categories';
+        hintEl.classList.remove('error');
+      } else if (selected < LIMIT) {
+        hintEl.textContent = `Choose ${LIMIT - selected} more to continue`;
+        hintEl.classList.remove('error');
+      } else {
+        hintEl.textContent = 'Ready! Press Continue';
+        hintEl.classList.remove('error');
+      }
+
+      // Ограничиваем выбор по лимиту
+      cards.forEach(card => {
+        if (reachedLimit) {
+          card.classList.add('limit-reached');
+        } else {
+          card.classList.remove('limit-reached');
+        }
+
+        // Уже выбранные можно всегда снять
+        if (card.classList.contains('selected')) {
+          card.classList.remove('limit-reached');
+        }
+      });
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const isSelected = card.classList.contains('selected');
+        const selectedCount = getSelectedCards().length;
+
+        if (isSelected) {
+          card.classList.remove('selected');
+        } else {
+          if (selectedCount >= LIMIT) {
+            // лимит достигнут — не даём выбрать ещё
+            hintEl.textContent = `You can choose only ${LIMIT} categories`;
+            hintEl.classList.add('error');
+            return;
+          }
+          card.classList.add('selected');
+        }
+
+        updateUI();
+      });
+    });
+
+    continueBtn.addEventListener('click', () => {
+      const selectedNames = getSelectedCards().map(card =>
+        card.getAttribute('data-name')
+      );
+      alert('Chosen categories:\n\n• ' + selectedNames.join('\n• '));
+    });
+
+    // Инициализация
+    updateUI();
+  </script>
+</body>
+</html>
